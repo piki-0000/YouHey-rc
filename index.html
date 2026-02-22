@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ゆうへい催眠アプリ</title>
+    <style>
+        :root { --primary: #ff0055; --kuzuha: #ff3333; --haru: #00ffcc; --bg: #0e1013; }
+        body { 
+            font-family: 'Helvetica Neue', Arial, sans-serif; background-color: var(--bg); color: #fff; margin: 0; height: 100vh;
+            display: flex; flex-direction: column; align-items: center; overflow: hidden; touch-action: manipulation;
+        }
+        .tabs { display: flex; width: 100%; background: #1a1d23; border-bottom: 1px solid #333; }
+        .tab { flex: 1; padding: 15px 0; text-align: center; font-size: 0.8rem; color: #666; cursor: pointer; transition: 0.3s; }
+        .tab.active { color: #fff; font-weight: bold; background: rgba(255, 255, 255, 0.05); }
+        .tab.active[data-mode="harusaruhi"] { border-bottom: 3px solid var(--haru); color: var(--haru); }
+        .tab.active[data-mode="kuzuha"] { border-bottom: 3px solid var(--kuzuha); color: var(--kuzuha); }
+        
+        .header { margin-top: 30px; text-align: center; }
+        .display {
+            width: 260px; height: 80px; border: 1px solid #333; margin: 20px 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; color: var(--primary); text-shadow: 0 0 10px var(--primary);
+            border-radius: 10px; background: #000; box-shadow: inset 0 0 15px rgba(255,0,85,0.2);
+        }
+        .controller { display: grid; grid-template-columns: repeat(3, 90px); grid-template-rows: repeat(3, 90px); gap: 15px; }
+        .btn {
+            background: #1e2126; border: 1px solid #444; border-radius: 20px;
+            color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 4px 4px 0px #000; transition: 0.1s;
+        }
+        .btn:active { transform: translate(2px, 2px); box-shadow: none; background: #333; }
+        .up { grid-column: 2; grid-row: 1; border-top: 2px solid var(--primary); }
+        .left { grid-column: 1; grid-row: 2; border-left: 2px solid var(--primary); }
+        .right { grid-column: 3; grid-row: 2; border-right: 2px solid var(--primary); }
+        .down { grid-column: 2; grid-row: 3; border-bottom: 2px solid var(--primary); }
+        .center-id { grid-column: 2; grid-row: 2; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; color: #555; text-align: center; }
+        footer { margin-top: auto; margin-bottom: 10px; font-size: 0.6rem; color: #444; }
+    </style>
+</head>
+<body>
+
+    <div class="tabs">
+        <div class="tab active" data-mode="harusaruhi" onclick="setMode('harusaruhi', this)">春猿火 ver</div>
+        <div class="tab" data-mode="kuzuha" onclick="setMode('kuzuha', this)">葛葉 ver</div>
+    </div>
+
+    <div class="header">
+        <div class="display" id="display">READY</div>
+    </div>
+
+    <div class="controller">
+        <div class="btn up" onclick="handlePress('雄平利口')">▲<span>雄平利口</span></div>
+        <div class="btn left" onclick="handlePress('LeftSide')">◀<span>LEFT</span></div>
+        <div class="center-id">YUHEI<br>SYSTEM</div>
+        <div class="btn right" onclick="handlePress('RightSide')">▶<span>RIGHT</span></div>
+        <div class="btn down" onclick="handlePress('雄平stop')">▼<span>雄平STOP</span></div>
+    </div>
+
+    <footer>※一度画面をタップしてから操作してください</footer>
+
+    <audio id="haru-幽閉利口" src="幽閉利口春猿火.mp3"></audio>
+    <audio id="haru-LeftSide" src="LeftSide春猿火.mp3"></audio>
+    <audio id="haru-RightSide" src="RightSide春猿火.mp3"></audio>
+    <audio id="haru-幽閉stop" src="幽閉stop春猿火.mp3"></audio>
+
+    <audio id="kuzu-幽閉利口" src="幽閉利口葛葉.mp3"></audio>
+    <audio id="kuzu-LeftSide" src="LeftSide葛葉.mp3"></audio>
+    <audio id="kuzu-RightSide" src="RightSide葛葉.mp3"></audio>
+    <audio id="kuzu-幽閉stop" src="幽閉stop葛葉.mp3"></audio>
+
+    <script>
+        let currentMode = 'harusaruhi';
+
+        function setMode(mode, element) {
+            currentMode = mode;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+            
+            // モードによってテーマカラー変更
+            const color = mode === 'harusaruhi' ? '#00ffcc' : '#ff3333';
+            document.documentElement.style.setProperty('--primary', color);
+            document.getElementById('display').innerText = "MODE CHANGED";
+        }
+
+        function handlePress(key) {
+            document.getElementById('display').innerText = key.toUpperCase() + "♪";
+            if (navigator.vibrate) navigator.vibrate(30);
+
+            // 全ての音声を一度停止
+            const allAudios = document.querySelectorAll('audio');
+            allAudios.forEach(a => { a.pause(); a.currentTime = 0; });
+
+            // 選択されたモードの音声を再生
+            const prefix = currentMode === 'harusaruhi' ? 'haru' : 'kuzu';
+            const audio = document.getElementById(`${prefix}-${key}`);
+            if (audio) {
+                audio.play().catch(e => console.log("再生エラー: 画面を一度タップしてください"));
+            }
+        }
+    </script>
+</body>
+</html>
